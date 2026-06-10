@@ -38,7 +38,7 @@
 </head>
 <body class="flex h-screen w-screen">
 
-    <button onclick="toggleSidebar()" class="md:hidden fixed top-4 left-4 z-50 gold-border bg-[#2c1e12] p-2 rounded">
+    <button id="mobile-menu-btn" class="md:hidden fixed top-4 left-4 z-50 gold-border bg-[#2c1e12] p-2 rounded">
         <span class="text-[#D4AF37] font-bold tracking-widest text-xs">MENU</span>
     </button>
 
@@ -53,7 +53,7 @@
     <div class="flex-1 flex flex-col relative h-full">
         <div class="h-16 md:h-20 border-b border-[#AA771C]/20 bg-[#2c1e12]/90 flex items-center justify-between px-6 z-20">
             <span class="text-xs text-gray-400 uppercase tracking-widest hidden md:block">Status: <span class="text-green-500 font-bold">Live</span></span>
-            <button onclick="toggleAudio()" id="audio-btn" class="gold-border px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black transition-colors ml-auto">
+            <button id="audio-btn" class="gold-border px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black transition-colors ml-auto">
                 🔊 INITIALIZE AUDIO
             </button>
         </div>
@@ -154,68 +154,22 @@
 
         let activeId = "m1-p1";
         let audioPlaying = false;
+        
+        // Element References
         const audioEl = document.getElementById('arc-audio');
         const audioBtn = document.getElementById('audio-btn');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const navContainer = document.getElementById('nav-container');
+        const contentArea = document.getElementById('lesson-content');
+        const scrollCanvas = document.getElementById('scroll-canvas');
 
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('-translate-x-full');
-        }
+        // HARDWIRED EVENT LISTENERS (Immune to mobile copy-paste errors)
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
 
-        function initNav() {
-            const nav = document.getElementById('nav-container');
-            nav.innerHTML = '';
-            structure.forEach(mod => {
-                let html = '<div class="mb-8"><div class="text-[10px] text-[#D4AF37] font-black mb-3 tracking-widest uppercase flex justify-between">' + mod.title;
-                if(mod.locked) html += ' <span class="text-red-500">🔒</span>';
-                html += '</div><ul class="space-y-1 pl-2 border-l border-[#AA771C]/30">';
-                
-                if(!mod.locked) {
-                    mod.parts.forEach(p => {
-                        const active = p.id === activeId ? 'active' : '';
-                        html += '<li><div onclick="loadPart(\\''+p.id+'\\')" class="nav-item px-4 py-2 text-xs font-bold text-gray-300 ' + active + '">' + p.title + '</div></li>';
-                    });
-                } else {
-                    html += '<li><div class="locked px-4 py-2 text-xs font-bold text-gray-500">AWAITING TRANSMISSION</div></li>';
-                }
-                nav.innerHTML += html + '</ul></div>';
-            });
-        }
-
-        function loadPart(id) {
-            activeId = id;
-            initNav();
-            
-            const template = document.getElementById(id);
-            const contentArea = document.getElementById('lesson-content');
-            
-            if(template) {
-                contentArea.innerHTML = template.innerHTML;
-            } else {
-                contentArea.innerHTML = '<h1 class="text-red-500">SYSTEM ERROR: CONTENT NOT FOUND</h1>';
-            }
-            
-            document.getElementById('scroll-canvas').scrollTop = 0;
-            
-            // Audio Reset
-            let partData;
-            structure.forEach(m => m.parts.forEach(p => { if(p.id === id) partData = p; }));
-            audioEl.src = partData.audio || "";
-            audioPlaying = false;
-            audioEl.pause();
-            audioBtn.innerHTML = '🔊 INITIALIZE AUDIO';
-            
-            // Close mobile menu on click
-            if(window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.add('-translate-x-full');
-            }
-
-            // Trigger animations
-            setTimeout(() => {
-                document.querySelectorAll('.fly-in').forEach(el => el.classList.add('active'));
-            }, 50);
-        }
-
-        function toggleAudio() {
+        audioBtn.addEventListener('click', () => {
             if(!audioEl.src || audioEl.src.endsWith(window.location.pathname)) {
                 alert("Audio track is offline for this module."); 
                 return;
@@ -228,17 +182,100 @@
                 audioBtn.innerHTML = '⏸ PAUSE DICTATION';
             }
             audioPlaying = !audioPlaying;
-        }
+        });
 
-        audioEl.onended = () => { 
+        audioEl.addEventListener('ended', () => {
             audioPlaying = false; 
             audioBtn.innerHTML = '🔊 INITIALIZE AUDIO'; 
-        };
+        });
 
-        window.onload = () => {
-            initNav();
-            loadPart('m1-p1');
-        };
+        function buildNavigation() {
+            navContainer.innerHTML = '';
+            
+            structure.forEach(mod => {
+                const section = document.createElement('div');
+                section.className = 'mb-8';
+                
+                // Header
+                const header = document.createElement('div');
+                header.className = 'text-[10px] text-[#D4AF37] font-black mb-3 tracking-widest uppercase flex justify-between';
+                header.innerText = mod.title;
+                if(mod.locked) {
+                    const lock = document.createElement('span');
+                    lock.className = 'text-red-500';
+                    lock.innerText = '🔒';
+                    header.appendChild(lock);
+                }
+                section.appendChild(header);
+
+                // List
+                const ul = document.createElement('ul');
+                ul.className = 'space-y-1 pl-2 border-l border-[#AA771C]/30';
+                
+                if(!mod.locked) {
+                    mod.parts.forEach(p => {
+                        const li = document.createElement('li');
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'nav-item px-4 py-2 text-xs font-bold text-gray-300 ' + (p.id === activeId ? 'active' : '');
+                        itemDiv.innerText = p.title;
+                        
+                        // Hardwired click event for dynamic items
+                        itemDiv.addEventListener('click', () => {
+                            loadContent(p.id);
+                        });
+                        
+                        li.appendChild(itemDiv);
+                        ul.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.innerHTML = '<div class="locked px-4 py-2 text-xs font-bold text-gray-500">AWAITING TRANSMISSION</div>';
+                    ul.appendChild(li);
+                }
+                
+                section.appendChild(ul);
+                navContainer.appendChild(section);
+            });
+        }
+
+        function loadContent(id) {
+            activeId = id;
+            buildNavigation(); // Rebuild to update active state
+            
+            const template = document.getElementById(id);
+            
+            if(template) {
+                contentArea.innerHTML = template.innerHTML;
+            } else {
+                contentArea.innerHTML = '<h1 class="text-red-500">SYSTEM ERROR: CONTENT NOT FOUND</h1>';
+            }
+            
+            scrollCanvas.scrollTop = 0;
+            
+            // Audio Reset
+            let partData;
+            structure.forEach(m => m.parts.forEach(p => { if(p.id === id) partData = p; }));
+            audioEl.src = partData.audio || "";
+            audioPlaying = false;
+            audioEl.pause();
+            audioBtn.innerHTML = '🔊 INITIALIZE AUDIO';
+            
+            // Close mobile menu on click
+            if(window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+            }
+
+            // Trigger animations safely
+            setTimeout(() => {
+                document.querySelectorAll('.fly-in').forEach(el => el.classList.add('active'));
+            }, 50);
+        }
+
+        // INIT
+        window.addEventListener('DOMContentLoaded', () => {
+            buildNavigation();
+            loadContent('m1-p1');
+        });
     </script>
 </body>
 </html>
