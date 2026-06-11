@@ -7,486 +7,443 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Montserrat:wght@300;500;800;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-deep: #1a120b;
-            --bg-mid: #2c1e12;
-            --bg-light: #4b3621;
-            --gold: #D4AF37;
-            --gold-glow: rgba(212, 175, 55, 0.4);
-            --cyan: #00FFFF;
-            --red: #FF003C;
-            --green: #004225;
-        }
-
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: radial-gradient(circle at top right, var(--bg-light), var(--bg-deep));
-            background-color: var(--bg-deep);
-            color: #FFFFFF;
-            font-family: 'Montserrat', sans-serif;
-            perspective: 1000px;
-        }
-
-        /* LIQUID GOLD TEXT */
-        .old-money-heading {
-            font-family: 'Playfair Display', serif;
-            background: linear-gradient(135deg, #BF953F, #FCF6BA, #b38728, #FBF5B7, #AA771C);
-            -webkit-background-clip: text;
-            color: transparent;
-            text-shadow: 0px 5px 15px var(--gold-glow);
-        }
-
-        .gold-border { border: 1px solid var(--gold); box-shadow: 0 0 15px var(--gold-glow); }
-        
-        /* 3D HOVER PHYSICS */
-        .tilt-card {
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
-            transform-style: preserve-3d;
-        }
-        .tilt-card:hover {
-            transform: translateY(-10px) rotateX(2deg) rotateY(-2deg) scale3d(1.02, 1.02, 1.02);
-            box-shadow: -10px 20px 30px rgba(0,0,0,0.8), inset 0 0 10px rgba(255,255,255,0.05);
-            z-index: 10;
-        }
-        
-        .hover-text-float { transition: transform 0.3s ease, text-shadow 0.3s ease; }
-        .tilt-card:hover .hover-text-float {
-            transform: translateZ(30px);
-            text-shadow: 0 10px 20px rgba(0,0,0,0.8);
-        }
-
-        /* SCROLL MAGIC */
-        .fly-in { opacity: 0; transform: translateY(40px) scale(0.95); transition: all 0.7s cubic-bezier(0.1, 0.8, 0.2, 1); }
-        .fly-in.active { opacity: 1; transform: translateY(0) scale(1); }
-        
-        /* KINETIC CLICK SHOCKWAVE */
-        .click-ripple {
-            position: fixed;
-            border-radius: 50%;
-            border: 2px solid var(--cyan);
-            box-shadow: 0 0 30px var(--cyan), inset 0 0 20px var(--cyan);
-            pointer-events: none;
-            transform: translate(-50%, -50%) scale(0);
-            animation: ripple 0.7s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
-            z-index: 99999;
-        }
-        @keyframes ripple {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; border-width: 4px; }
-            100% { transform: translate(-50%, -50%) scale(4); opacity: 0; border-width: 0px; }
-        }
-
-        /* UI ELEMENTS */
+        :root { --bg-deep: #120c08; --bg-mid: #1a120b; --gold: #D4AF37; --cyan: #00FFFF; --red: #FF003C; }
+        body { margin: 0; overflow: hidden; background-color: var(--bg-deep); color: #FFFFFF; font-family: 'Montserrat', sans-serif; }
+        .old-money-heading { font-family: 'Playfair Display', serif; background: linear-gradient(135deg, #BF953F, #FCF6BA, #b38728, #FBF5B7, #AA771C); -webkit-background-clip: text; color: transparent; }
+        .gold-border { border: 1px solid var(--gold); box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
+        .fly-in { opacity: 0; transform: translateY(50px); transition: all 0.8s cubic-bezier(0.1, 0.8, 0.2, 1); }
+        .fly-in.active { opacity: 1; transform: translateY(0); }
+        .thunder-strike { position: fixed; background: var(--cyan); box-shadow: 0 0 30px var(--cyan), 0 0 60px #FFFFFF; pointer-events: none; clip-path: polygon(40% 0%, 60% 0%, 50% 40%, 80% 40%, 30% 100%, 45% 55%, 10% 55%); animation: thunder 0.4s ease-out forwards; z-index: 99999; transform: translate(-50%, -50%); }
+        @keyframes thunder { 0% { width: 10px; height: 50px; opacity: 1; transform: translate(-50%, -50%) scale(1); filter: brightness(2); } 50% { width: 20px; height: 100px; opacity: 0.8; transform: translate(-50%, -50%) scale(1.5) rotate(15deg); } 100% { width: 0px; height: 0px; opacity: 0; transform: translate(-50%, -50%) scale(2); filter: brightness(1); } }
         .nav-item { cursor: pointer; transition: all 0.3s; border-left: 3px solid transparent; }
-        .nav-item.active { background: rgba(212,175,55,0.15); border-left: 3px solid var(--gold); color: var(--gold); }
-        .nav-item:hover:not(.active) { background: rgba(255,255,255,0.05); transform: translateX(5px); }
-        
-        .locked-item { opacity: 0.4; cursor: not-allowed; border-left: 3px solid transparent; background: rgba(255,0,0,0.05); }
-        .locked-item:hover { opacity: 0.6; background: rgba(255,0,0,0.1); }
-
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: var(--bg-deep); }
-        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
-
-        /* SECRET CLICKABLE LINKS */
-        .stealth-link {
-            color: var(--cyan);
-            text-decoration: underline;
-            text-underline-offset: 4px;
-            font-weight: 800;
-            transition: all 0.3s ease;
-        }
-        .stealth-link:hover {
-            color: var(--gold);
-            background: rgba(212, 175, 55, 0.1);
-            text-shadow: 0 0 10px var(--cyan);
-        }
+        .nav-item.active { background: rgba(212,175,55,0.1); border-left: 3px solid var(--gold); color: var(--gold); }
+        .nav-item:hover:not(.active) { background: rgba(255,255,255,0.05); }
+        .locked-item { opacity: 0.3; cursor: not-allowed; }
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--gold); }
+        .chapter-marker { border-left: 4px solid var(--gold); padding-left: 20px; margin-top: 60px; margin-bottom: 20px; }
+        .text-block { font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.5rem; color: #d1d5db; font-weight: 500; }
+        .stealth-link { color: var(--cyan); text-decoration: underline; text-underline-offset: 4px; font-weight: 800; }
     </style>
 </head>
 <body class="flex h-screen w-screen">
-
-    <button id="mobile-menu-btn" class="md:hidden fixed top-4 left-4 z-50 gold-border bg-[var(--bg-mid)] p-2 rounded">
-        <span class="text-[var(--gold)] font-bold tracking-widest text-xs">MENU</span>
+    <button id="mobile-menu-btn" class="md:hidden fixed top-4 left-4 z-50 gold-border bg-[#1a120b] p-2 rounded">
+        <span class="text-[#D4AF37] font-bold tracking-widest text-xs">MENU</span>
     </button>
-
-    <div id="sidebar" class="w-72 md:w-80 h-full bg-[#110b07] border-r border-[#AA771C]/30 flex-shrink-0 absolute md:relative z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-400 shadow-2xl">
-        <div class="p-8 border-b border-[#AA771C]/20 bg-gradient-to-b from-[#2c1e12] to-[#110b07]">
+    <div id="sidebar" class="w-72 md:w-80 h-full bg-[#0a0705] border-r border-[#AA771C]/30 flex-shrink-0 absolute md:relative z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-400">
+        <div class="p-8 border-b border-[#AA771C]/20 bg-[#120c08]">
             <h2 class="old-money-heading text-5xl tracking-tighter">ARC</h2>
-            <p class="text-[10px] text-gray-400 uppercase tracking-[0.3em] mt-2 font-black">The $10M Matrix</p>
+            <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mt-2 font-black">The $10M Matrix</p>
         </div>
-        <div class="overflow-y-auto p-4 space-y-8" id="nav-container"></div>
+        <div class="overflow-y-auto p-4 space-y-6 pb-20" id="nav-container"></div>
     </div>
-
     <div class="flex-1 flex flex-col relative h-full">
-        <div class="h-16 md:h-20 border-b border-[#AA771C]/20 bg-[#1a120b]/90 backdrop-blur-md flex items-center justify-between px-6 md:px-12 z-20 shadow-2xl">
-            <span class="text-xs text-gray-500 uppercase tracking-widest hidden md:block font-mono">CONNECTION: <span class="text-[#00FFFF] font-bold animate-pulse">SECURE</span></span>
-            <button id="audio-btn" class="gold-border px-6 py-3 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black transition-all ml-auto shadow-[0_0_15px_rgba(212,175,55,0.2)]">
-                🔊 INITIALIZE AUDIO
+        <div class="h-16 md:h-20 border-b border-[#AA771C]/20 bg-[#120c08]/90 backdrop-blur-md flex items-center justify-between px-6 md:px-12 z-20">
+            <span class="text-xs text-gray-500 uppercase tracking-widest hidden md:block font-mono">NEURAL LINK: <span class="text-[#00FFFF] font-bold">ACTIVE</span></span>
+            <button id="audio-btn" class="gold-border px-6 py-3 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black transition-all ml-auto">
+                🔊 INITIALIZE DICTATION
             </button>
         </div>
-
         <div id="scroll-canvas" class="flex-1 overflow-y-auto p-6 md:p-16 pt-24 relative z-10 scroll-smooth">
             <div class="max-w-4xl mx-auto pb-40" id="lesson-content"></div>
         </div>
     </div>
 
-    <audio id="arc-audio" loop></audio>
-
     <template id="m1-p1">
-        <h1 class="old-money-heading text-5xl md:text-7xl mb-12 fly-in text-center md:text-left">THE ARC NATURAL</h1>
-        <div class="tilt-card bg-[#2c1e12]/80 border border-[#AA771C]/40 p-8 md:p-12 mb-10 rounded-sm fly-in">
-            <h2 class="text-3xl font-black text-[#D4AF37] mb-8 tracking-widest uppercase hover-text-float">1. The Vision & The Truth 👁️</h2>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300 font-medium">Listen to me motherfucker. You have been sold a lie. They told you that to get rich, you need to invent a product, source shipping from China, and deal with furious customers.</p>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300 font-medium">That is a suicide mission. You become the slave to your own product.</p>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300 font-medium">Affiliate marketing inside the <span class="text-white font-bold">ARC Natural</span> model is pure, untethered leverage. You are the ghost. You find a product that is already converting millions of dollars, you grab a custom link, and you route attention to it. When they buy, the code wires you 50% to 80% of the cash. <br><br>🛑 No customer support. <br>🛑 No returns. <br>🛑 No bullshit overhead.</p>
-            
-            <div class="bg-black/60 p-8 border-l-4 border-cyan-500 mt-10 shadow-[0_0_20px_rgba(0,255,255,0.1)]">
-                <h4 class="text-cyan-400 font-black text-xl mb-4 tracking-widest uppercase">🧠 REAL WORLD MATH</h4>
-                <p class="font-mono text-sm leading-relaxed text-gray-300">A guy creates a $1,000 course on algorithmic trading. He is exhausted running ads. You step in. You make brutal, highly-edited TikTok videos about trading psychology, and drop your affiliate link in the bio.<br><br>
-                ➤ One video hits the algorithm. 500k views.<br>
-                ➤ 1% click the link (5,000 people).<br>
-                ➤ 0.2% buy the course (10 people).<br>
-                ➤ You just made <span class="text-green-400 font-bold">$5,000</span> while taking a fucking shit. That is the power of the Natural.</p>
-            </div>
-        </div>
+        <h1 class="old-money-heading text-5xl md:text-7xl mb-4 fly-in">ARC AFFILIATE</h1>
+        <p class="text-xl text-[#00FFFF] font-mono tracking-widest mb-12 fly-in">PART 1: THE KNOWLEDGE MATRIX</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 1: THE TRADITIONAL GRAVEYARD</h2></div>
+        <p class="text-block fly-in">Traditional affiliate marketing is a graveyard of broken dreams and wasted time.</p>
+        <p class="text-block fly-in">They tell you to start a blog about dog food, write SEO articles for six months, and pray to Google for traffic.</p>
+        <p class="text-block fly-in">You will make pennies. You will waste the best years of your life waiting for an algorithm to bless you. We do not wait.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 2: THE ARC MUTATION</h2></div>
+        <p class="text-block fly-in">ARC Affiliate relies on kinetic velocity, short-form hacking, and absolute ruthlessness.</p>
+        <p class="text-block fly-in">You are running a digital pirate radio station. You intercept attention from massive platforms like TikTok and Instagram.</p>
+        <p class="text-block fly-in">You route that hijacked attention directly to the ARC Whop storefront, and you extract capital instantly. No SEO. No waiting.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 3: THE WHOP REALITY MATH</h2></div>
+        <p class="text-block fly-in">Let's look at the real-world math. You drive traffic to the ARC Whop community.</p>
+        <p class="text-block fly-in">A user clicks your link. They see the value. They pay the $49/month access fee to learn the systems.</p>
+        <p class="text-block fly-in">With a 50% commission rate, you are making $24.50 every single month from that one single click.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 4: THE COMPOUNDING DELUSION</h2></div>
+        <p class="text-block fly-in">Broke people think $24.50 is small. That is exactly why they stay broke.</p>
+        <p class="text-block fly-in">You get 100 people into the Whop. You are now making $2,450 a month, passively.</p>
+        <p class="text-block fly-in">You do not answer their questions. You do not provide the updates. We do. You just own the toll booth.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 5: THE ANONYMITY SHIELD</h2></div>
+        <p class="text-block fly-in">You never have to show your face. Fame is a massive liability in this game.</p>
+        <p class="text-block fly-in">You run theme pages. You post raw, aesthetic, aggressive content. The brand is the voice, not your face.</p>
+        <p class="text-block fly-in">This allows you to run 5 different accounts simultaneously. If one gets banned, the empire survives.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 6: THE ALGORITHM SLOT MACHINE</h2></div>
+        <p class="text-block fly-in">The TikTok algorithm is a slot machine. If you pull the lever enough times with high-quality hooks, you hit the jackpot.</p>
+        <p class="text-block fly-in">You do not need to be creative. You steal concepts that already went viral, rewrite the hook, and upgrade the visuals.</p>
+        <p class="text-block fly-in">Volume negates luck. Post 3 times a day. By day 30, you will have a video break 100k views.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 7: THE CURIOSITY GAP</h2></div>
+        <p class="text-block fly-in">Never sell the product in the video. The video's only job is to sell the click.</p>
+        <p class="text-block fly-in">You show them the outcome: A massive Stripe dashboard or a life of absolute freedom.</p>
+        <p class="text-block fly-in">You tell them the secret is in the bio. You force them to click to close the psychological loop.</p>
     </template>
 
     <template id="m1-p2">
-        <h1 class="old-money-heading text-5xl md:text-7xl mb-12 fly-in text-center md:text-left">THE SETUP PROTOCOL</h1>
-        <div class="tilt-card bg-[#2c1e12]/80 border border-[#AA771C]/40 p-8 md:p-12 mb-10 rounded-sm fly-in">
-            <h2 class="text-3xl font-black text-[#D4AF37] mb-8 tracking-widest uppercase hover-text-float">2. Done-For-You Infrastructure ⚙️</h2>
-            
-            <p class="text-lg md:text-xl leading-loose mb-10 text-gray-300">You need the digital armory. You do not build a website, you build a funnel. We hijack existing networks.</p>
-            
-            <ul class="space-y-6 text-gray-300">
-                <li class="p-6 bg-black/40 border border-gray-800 rounded shadow-inner">
-                    <span class="text-red-500 font-black text-xl block mb-2">STEP 1: THE NETWORK 🕸️</span> 
-                    Go to <a href="https://gumroad.com/discover" target="_blank" class="stealth-link">Gumroad Discover</a> or ClickBank. Filter by "High Converting" and a price point above $100. Apply to be an affiliate. Grab your custom link.
-                </li>
-                
-                <li class="p-6 bg-black/40 border border-gray-800 rounded shadow-inner">
-                    <span class="text-red-500 font-black text-xl block mb-2">STEP 2: THE STOREFRONT 🏪</span> 
-                    You cannot put raw, ugly affiliate links in your bio. You will get shadowbanned. You build a bridging mechanism. Use <a href="https://linktr.ee" target="_blank" class="stealth-link">Linktree</a> or build a sleek, one-page redirect using <a href="https://carrd.co" target="_blank" class="stealth-link">Carrd</a>.
-                </li>
-                
-                <li class="p-6 bg-black/40 border border-gray-800 rounded shadow-inner">
-                    <span class="text-red-500 font-black text-xl block mb-2">STEP 3: THE DISTRIBUTION 🚀</span> 
-                    Download <a href="https://www.capcut.com" target="_blank" class="stealth-link">CapCut Desktop</a>. Steal podcasts from high-status individuals (Tate, Rogan, Hormozi). Cut the most aggressive 15-second hooks. Post 3 times a day on TikTok, YouTube Shorts, and IG Reels. Burn the boats.
-                </li>
-            </ul>
-        </div>
+        <h1 class="old-money-heading text-5xl md:text-7xl mb-4 fly-in">ARC AFFILIATE</h1>
+        <p class="text-xl text-[#00FFFF] font-mono tracking-widest mb-12 fly-in">PART 2: THE SETUP PROTOCOL</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 1: THE BURNER ACCOUNTS</h2></div>
+        <p class="text-block fly-in">Do not use your personal phone. Buy a cheap, used iPhone for $50. Factory reset it.</p>
+        <p class="text-block fly-in">Create a new Gmail account. Use this email to create fresh TikTok, Instagram, and YouTube Shorts accounts.</p>
+        <p class="text-block fly-in">Warm up the accounts for 24 hours. Scroll the feed. Like videos in your niche. Show the algorithm you are human.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 2: THE ARC WHOP LINK</h2></div>
+        <p class="text-block fly-in">Go to the ARC Whop page. Apply to the affiliate program. Grab your custom tracking link.</p>
+        <p class="text-block fly-in">This link is your financial lifeline. Do not lose it. Do not post it raw.</p>
+        <p class="text-block fly-in">Raw affiliate links get you shadowbanned. We must build a bridge to protect the traffic.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 3: THE CARRD BRIDGE</h2></div>
+        <p class="text-block fly-in">Go to Carrd.co. Create a free one-page website. Keep it dark, minimal, and aggressive.</p>
+        <p class="text-block fly-in">Put one single button on the page: "ACCESS THE ARC MATRIX". Link that button to your Whop affiliate link.</p>
+        <p class="text-block fly-in">Put the Carrd link in your social media bios. You have now bypassed the spam filters.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 4: THE CAPCUT FACTORY</h2></div>
+        <p class="text-block fly-in">Download CapCut Desktop. It is free and faster than editing on your phone.</p>
+        <p class="text-block fly-in">Find high-performing podcasts (Tate, Hormozi, Goggins). Download them.</p>
+        <p class="text-block fly-in">Cut out the dead space. Add aggressive, PUBG-style captions. Add a heavy bass background track.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 5: THE HOOK LIBRARY</h2></div>
+        <p class="text-block fly-in">Spend 2 hours compiling a list of 50 viral hooks. Do not reinvent the wheel.</p>
+        <p class="text-block fly-in">"The 40-year trap is a scam." "Why your boss wants you broke." "The matrix wants you weak."</p>
+        <p class="text-block fly-in">Paste these hooks over the first 3 seconds of your videos. If the hook fails, the video dies.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 6: BANKING OP-SEC</h2></div>
+        <p class="text-block fly-in">When setting up Gumroad or Whop payouts, operational security is critical.</p>
+        <p class="text-block fly-in">If you coordinate with your father to bypass live face verification, the banking details MUST perfectly match his ID.</p>
+        <p class="text-block fly-in">If the bank account says Prameshwar, do not type Parmeshwar. One spelling error locks your funds. Be precise.</p>
     </template>
 
     <template id="m1-p3">
-        <h1 class="old-money-heading text-5xl md:text-7xl mb-12 fly-in text-center md:text-left">THE MANIPULATION</h1>
-        <div class="tilt-card bg-[#2c1e12]/80 border border-[#FF003C]/40 p-8 md:p-12 mb-10 rounded-sm fly-in shadow-[0_0_30px_rgba(255,0,60,0.1)]">
-            <h2 class="text-3xl font-black text-[#FF003C] mb-8 tracking-widest uppercase hover-text-float">3. Psychological Warfare 🎭</h2>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300">People do not buy logic. They buy out of fear, greed, and status. If you post a video saying "Buy this course," you will make zero dollars.</p>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300">You must trigger the algorithm and the human simultaneously. Use the <span class="text-[#D4AF37] font-black border-b-2 border-[#D4AF37]">Curiosity Gap</span>. Show them a massive result—a guy driving a McLaren or a $10k Stripe dashboard. Tell them exactly *why* their current life is failing. Then, hide the mechanism behind the link.</p>
-            
-            <div class="bg-red-900/20 p-8 border-l-4 border-red-500 mt-10">
-                <h4 class="font-black text-white text-xl mb-4 tracking-widest uppercase">🔥 THE BOOSTER TACTIC</h4>
-                <p class="font-mono text-base leading-relaxed text-gray-300">Never sell in the video. The video's ONLY job is to get them to read the caption. The caption's ONLY job is to make them click the link. The sales page does the actual selling. If you try to do the sales page's job, you break the psychology. Be a router, not a salesman.</p>
-            </div>
-        </div>
-    </template>
+        <h1 class="old-money-heading text-5xl md:text-7xl mb-4 fly-in">ARC AFFILIATE</h1>
+        <p class="text-xl text-[#00FFFF] font-mono tracking-widest mb-12 fly-in">PART 3: THE MANIPULATION</p>
 
-    <template id="m2-p1">
-        <h1 class="old-money-heading text-5xl md:text-7xl mb-12 fly-in text-center md:text-left">AI TRAINING AGENCY</h1>
-        <div class="tilt-card bg-[#2c1e12]/80 border border-[#AA771C]/40 p-8 md:p-12 mb-10 rounded-sm fly-in">
-            <h2 class="text-3xl font-black text-[#D4AF37] mb-8 tracking-widest uppercase hover-text-float">1. The Bleeding Neck 🩸</h2>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300 font-medium">Right now, every 50-year-old CEO is terrified of Artificial Intelligence. They watch the news, they hear AI is replacing jobs, and they think their business is going to die. They have no fucking clue how to use it. This is your goldmine.</p>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300 font-medium">You are not a coder. You are an <span class="text-white font-bold">AI Integrator</span>. You walk into a real estate office, an accounting firm, or a dental clinic, and you show them how a simple AI chatbot can save them $60,000 a year on a receptionist. You charge them $3,000 for the setup, and $500 a month for "maintenance" (which costs you $0). You are selling pure survival.</p>
-            
-            <div class="bg-black/60 p-8 border-l-4 border-green-500 mt-10 shadow-[0_0_20px_rgba(0,255,0,0.1)]">
-                <h4 class="text-green-400 font-black text-xl mb-4 tracking-widest uppercase">💸 REAL WORLD MATH</h4>
-                <p class="font-mono text-sm leading-relaxed text-gray-300">A local plumber loses 5 jobs a week because no one answers his phone at 2 AM. You build an AI voice agent that answers the phone 24/7, books the calendar, and texts the client.<br><br>
-                ➤ You just made that plumber an extra $10k a month in salvaged leads.<br>
-                ➤ He will gladly pay you a $2k setup and $500/mo retainer forever.<br>
-                ➤ 10 clients = <span class="text-green-400 font-bold">$5,000/month</span> pure passive income.</p>
-            </div>
-        </div>
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 1: THE SHADOWBAN MYTH</h2></div>
+        <p class="text-block fly-in">Amateurs cry about shadow bans when their videos get 200 views. You are not shadowbanned.</p>
+        <p class="text-block fly-in">Your video just fucking sucked. The algorithm tested it on 200 people, and they swiped away.</p>
+        <p class="text-block fly-in">Accept reality. Fix your hooks. Increase your pacing. Stop blaming the system for your weak content.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 2: RETENTION IS KING</h2></div>
+        <p class="text-block fly-in">TikTok does not care about your message. It cares about watch time.</p>
+        <p class="text-block fly-in">If a video is 15 seconds long, they need to watch 12 seconds of it. That is the only metric that forces virality.</p>
+        <p class="text-block fly-in">Change the visual on the screen every 2 seconds. Jump cuts. Zoom ins. Keep their dopamine spiking.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 3: THE CALL TO ACTION (CTA)</h2></div>
+        <p class="text-block fly-in">Never put the CTA in the middle of the video. It ruins the retention.</p>
+        <p class="text-block fly-in">Flash a 1-second text on screen at the very end: "Link in bio to escape."</p>
+        <p class="text-block fly-in">Make the caption aggressive. "99% of you will scroll past this. The 1% will check the bio." Challenge their ego.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 4: EMOTIONAL TRIGGERS</h2></div>
+        <p class="text-block fly-in">People buy because they are angry, desperate, or greedy. Hit those triggers.</p>
+        <p class="text-block fly-in">Talk about how inflation is stealing their money. Talk about how their boss treats them like a dog.</p>
+        <p class="text-block fly-in">Agitate the pain so deeply that the $49 Whop subscription looks like a life raft.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 5: THE VOLUME BRUTE FORCE</h2></div>
+        <p class="text-block fly-in">You will post 50 videos and get zero sales. You will feel like a failure.</p>
+        <p class="text-block fly-in">That is the filter. The matrix is designed to break weak minds before they succeed.</p>
+        <p class="text-block fly-in">An Operator looks at the analytics, realizes the hook retention is at 10%, rewrites the hook, and posts again.</p>
+            </template>
+                <template id="m2-p1">
+        <h1 class="old-money-heading text-5xl md:text-7xl mb-4 fly-in">AI TRAINING AGENCY</h1>
+        <p class="text-xl text-[#00FFFF] font-mono tracking-widest mb-12 fly-in">PART 1: THE KNOWLEDGE MATRIX</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 1: THE BLEEDING NECK</h2></div>
+        <p class="text-block fly-in">Right now, every 50-year-old CEO is terrified of Artificial Intelligence.</p>
+        <p class="text-block fly-in">They watch the news, hear AI is replacing jobs, and think their business is going to die.</p>
+        <p class="text-block fly-in">They have no fucking clue how to use it. This panic is your multi-million dollar goldmine.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 2: THE AI INTEGRATOR</h2></div>
+        <p class="text-block fly-in">You are not a coder. You do not write Python scripts.</p>
+        <p class="text-block fly-in">You are an AI Integrator. You connect existing billionaire-dollar infrastructure to local businesses.</p>
+        <p class="text-block fly-in">You walk into a dental clinic, and show them how an AI chatbot replaces a $60k receptionist.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 3: THE PRICING MODEL</h2></div>
+        <p class="text-block fly-in">You charge them $3,000 for the initial system setup. This takes you 4 hours of drag-and-drop work.</p>
+        <p class="text-block fly-in">You then charge them $500 a month for "maintenance and server hosting."</p>
+        <p class="text-block fly-in">The APIs cost you maybe $12 a month. The rest is pure, unadulterated profit margin.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 4: REAL WORLD MATH</h2></div>
+        <p class="text-block fly-in">A local plumber loses 5 jobs a week because no one answers his phone at 2 AM.</p>
+        <p class="text-block fly-in">You build an AI voice agent that answers the phone 24/7, books the calendar, and texts the client.</p>
+        <p class="text-block fly-in">You just made that plumber an extra $10k a month. He will gladly pay your $500/mo retainer forever.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 5: THE NO-CODE ARCHITECTURE</h2></div>
+        <p class="text-block fly-in">You use OpenAI's API for the brain. You upload the company's PDF manuals.</p>
+        <p class="text-block fly-in">You use Voiceflow or Vapi.ai to drag-and-drop the conversation tree.</p>
+        <p class="text-block fly-in">You use Make.com to automatically send the AI's lead data into the client's Google Sheet.</p>
     </template>
 
     <template id="m2-p2">
-        <h1 class="old-money-heading text-5xl md:text-7xl mb-12 fly-in text-center md:text-left">THE SETUP PROTOCOL</h1>
-        <div class="tilt-card bg-[#2c1e12]/80 border border-[#AA771C]/40 p-8 md:p-12 mb-10 rounded-sm fly-in">
-            <h2 class="text-3xl font-black text-[#D4AF37] mb-8 tracking-widest uppercase hover-text-float">2. The No-Code Matrix 💻</h2>
-            
-            <p class="text-lg md:text-xl leading-loose mb-10 text-gray-300">You do not need to know Python. The infrastructure is already built by billionaires. We just connect the pipes.</p>
-            
-            <ul class="space-y-6 text-gray-300">
-                <li class="p-6 bg-black/40 border border-gray-800 rounded shadow-inner">
-                    <span class="text-cyan-400 font-black text-xl block mb-2">THE BRAIN 🧠</span> 
-                    You will use the <a href="https://platform.openai.com" target="_blank" class="stealth-link">OpenAI API</a> to give the bot intelligence. You feed it a PDF of the company's FAQs. Done.
-                </li>
-                
-                <li class="p-6 bg-black/40 border border-gray-800 rounded shadow-inner">
-                    <span class="text-cyan-400 font-black text-xl block mb-2">THE VOICE ENGINE 🎙️</span> 
-                    You build the conversational flows visually using <a href="https://www.voiceflow.com" target="_blank" class="stealth-link">Voiceflow</a> or Vapi.ai. It is drag and drop. A child could do it.
-                </li>
-                
-                <li class="p-6 bg-black/40 border border-gray-800 rounded shadow-inner">
-                    <span class="text-cyan-400 font-black text-xl block mb-2">THE AUTOMATION ⚙️</span> 
-                    When the bot takes a message, it needs to go to the client's CRM. You wire the connections using <a href="https://make.com" target="_blank" class="stealth-link">Make.com</a> or Zapier. Zero code required.
-                </li>
-            </ul>
-        </div>
+        <h1 class="old-money-heading text-5xl md:text-7xl mb-4 fly-in">AI TRAINING AGENCY</h1>
+        <p class="text-xl text-[#00FFFF] font-mono tracking-widest mb-12 fly-in">PART 2: THE SETUP PROTOCOL</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 1: THE OPENAI ENGINE</h2></div>
+        <p class="text-block fly-in">Go to platform.openai.com. Create a developer account and load $20 into it.</p>
+        <p class="text-block fly-in">Generate a secret API key. Do not share this key with anyone. It is the brain of your operation.</p>
+        <p class="text-block fly-in">Create an Assistant. Prompt it: "You are the receptionist for [Company]. Answer questions strictly based on the provided document."</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 2: THE VOICEFLOW BUILD</h2></div>
+        <p class="text-block fly-in">Sign up for Voiceflow. Start a blank project. Create a simple "Hello, how can I help?" node.</p>
+        <p class="text-block fly-in">Connect that node to an API block. Paste your OpenAI key inside it.</p>
+        <p class="text-block fly-in">Now, whatever the customer types, Voiceflow sends it to OpenAI, gets the smart answer, and sends it back.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 3: THE MAKE.COM PIPELINE</h2></div>
+        <p class="text-block fly-in">The business owner wants the leads on his phone, not inside Voiceflow.</p>
+        <p class="text-block fly-in">Set up a webhook in Make.com. When the AI collects an email, tell Voiceflow to fire that webhook.</p>
+        <p class="text-block fly-in">Make.com catches the data and instantly texts it to the business owner via Twilio. Magic.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 4: THE LEAD SCRAPING</h2></div>
+        <p class="text-block fly-in">You have the product. Now you need targets. Go to Apollo.io.</p>
+        <p class="text-block fly-in">Search for "Plumbing Owners in Texas" or "Real Estate Brokers in Florida."</p>
+        <p class="text-block fly-in">Extract 1,000 verified emails. These are your targets. Do not email them from your personal Gmail.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 5: THE COLD INFRASTRUCTURE</h2></div>
+        <p class="text-block fly-in">Buy 3 burner domains that look like your main agency website.</p>
+        <p class="text-block fly-in">Set up Google Workspace inboxes for them. Connect them to Instantly.ai.</p>
+        <p class="text-block fly-in">Warm up the emails for 14 days, then blast your script to the 1,000 leads. Watch the replies roll in.</p>
     </template>
 
     <template id="m2-p3">
-        <h1 class="old-money-heading text-5xl md:text-7xl mb-12 fly-in text-center md:text-left">THE MANIPULATION</h1>
-        <div class="tilt-card bg-[#2c1e12]/80 border border-[#FFD700]/40 p-8 md:p-12 mb-10 rounded-sm fly-in shadow-[0_0_30px_rgba(255,215,0,0.1)]">
-            <h2 class="text-3xl font-black text-[#FFD700] mb-8 tracking-widest uppercase hover-text-float">3. Fear-Based Sales 🕷️</h2>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300">When you cold email or walk into a business, never say "Do you want to buy an AI bot?" They will say no.</p>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300">You use the <span class="text-white font-black border-b-2 border-white">Phantom Competitor Tactic</span>. You say: "Your biggest competitor across town just implemented a 24/7 AI booking system. They are stealing your midnight leads. Let me install the exact same system for you by Friday so you don't go out of business."</p>
-            
-            <div class="bg-yellow-900/20 p-8 border-l-4 border-yellow-500 mt-10">
-                <h4 class="font-black text-white text-xl mb-4 tracking-widest uppercase">📈 THE RETAINER BOOSTER</h4>
-                <p class="font-mono text-base leading-relaxed text-gray-300">Never sell a one-off project. Software breaks. APIs update. Charge a massive setup fee ($2,500), but lock them into a $500/month "AI Hosting and Optimization" contract. You get 10 clients, you have $5,000 hitting your bank account every single month on autopilot while you sleep. That is how you scale to $10M.</p>
-            </div>
-        </div>
+        <h1 class="old-money-heading text-5xl md:text-7xl mb-4 fly-in">AI TRAINING AGENCY</h1>
+        <p class="text-xl text-[#00FFFF] font-mono tracking-widest mb-12 fly-in">PART 3: THE MANIPULATION</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 1: THE PHANTOM COMPETITOR</h2></div>
+        <p class="text-block fly-in">Never walk in and say "Do you want to buy an AI bot?" They will say no.</p>
+        <p class="text-block fly-in">You say: "Your biggest competitor across town just implemented a 24/7 AI booking system."</p>
+        <p class="text-block fly-in">"They are stealing your midnight leads. Let me install the exact same system for you so you don't go out of business."</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 2: THE SHOW, DON'T TELL TACTIC</h2></div>
+        <p class="text-block fly-in">Do not send long, boring proposals. Send them a phone number.</p>
+        <p class="text-block fly-in">Tell the CEO: "Call this number right now." The AI answers, uses his name, and pitches his own business back to him.</p>
+        <p class="text-block fly-in">His mind will shatter. The sale is closed before you even discuss the price.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 3: OBJECTION DESTRUCTION</h2></div>
+        <p class="text-block fly-in">They will say: "My current receptionist handles the calls."</p>
+        <p class="text-block fly-in">You reply: "Does she answer the phone at 3 AM on a Sunday? Because that's when a pipe bursts and the client is desperate."</p>
+        <p class="text-block fly-in">Frame the AI as a net-positive revenue generator, not an expense.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 4: THE RETAINER TRAP</h2></div>
+        <p class="text-block fly-in">Never sell a one-off project. Software breaks. Prompts need updating.</p>
+        <p class="text-block fly-in">You lock them into a 12-month contract. That is the true value of an agency.</p>
+        <p class="text-block fly-in">10 clients at $500/mo is $5,000 hitting your bank account every month on autopilot.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 5: SCALING VELOCITY</h2></div>
+        <p class="text-block fly-in">Once you build a bot for one roofer, you have the blueprint for every roofer on earth.</p>
+        <p class="text-block fly-in">You clone the exact same Voiceflow template, change the company name, and sell it to 50 other roofers in different cities.</p>
+        <p class="text-block fly-in">You are printing money using the exact same digital asset.</p>
     </template>
 
     <template id="m3-p1">
-        <h1 class="old-money-heading text-5xl md:text-7xl mb-12 fly-in text-center md:text-left">SAAS TOLL BOOTH</h1>
-        <div class="tilt-card bg-[#2c1e12]/80 border border-[#AA771C]/40 p-8 md:p-12 mb-10 rounded-sm fly-in">
-            <h2 class="text-3xl font-black text-[#D4AF37] mb-8 tracking-widest uppercase hover-text-float">1. High-Ticket Brokerage 🛑</h2>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300 font-medium">This is the ultimate high-status play. Software as a Service (SaaS) companies have 99% profit margins. Once the code is written, a new user costs them zero dollars. Because of this, they will pay you absolutely absurd commissions to bring them enterprise clients.</p>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300 font-medium">You are the bridge between a multi-million dollar software company and a bleeding local business. You find the business, diagnose their archaic systems, and route them to a $5,000 software. The software company wires you $2,500 just for dropping the link.</p>
-            
-            <div class="bg-black/60 p-8 border-l-4 border-[#00FFFF] mt-10 shadow-[0_0_20px_rgba(0,255,255,0.1)]">
-                <h4 class="text-cyan-400 font-black text-xl mb-4 tracking-widest uppercase">💰 REAL WORLD MATH</h4>
-                <p class="font-mono text-sm leading-relaxed text-gray-300">A marketing agency is using 6 different softwares paying $1,000/mo. You introduce them to HighLevel, which does it all for $297/mo. They switch immediately to save money.<br><br>
-                ➤ HighLevel pays you 40% recurring commission.<br>
-                ➤ You get $118 every month for as long as they use it.<br>
-                ➤ Get 100 agencies. You are making <span class="text-cyan-400 font-bold">$11,800 a month</span> in pure passive income.</p>
-            </div>
-        </div>
+        <h1 class="old-money-heading text-5xl md:text-7xl mb-4 fly-in">FUTURES WARFARE</h1>
+        <p class="text-xl text-[#00FFFF] font-mono tracking-widest mb-12 fly-in">PART 1: THE KNOWLEDGE MATRIX</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 1: THE SPOT TRADING LIE</h2></div>
+        <p class="text-block fly-in">Buying a coin and waiting for it to go up is for grandpas holding heavy bags.</p>
+        <p class="text-block fly-in">Spot trading requires massive capital. If you have $100 and the coin goes up 10%, you made $10. Pathetic.</p>
+        <p class="text-block fly-in">We do not wait years. We extract instant liquidity using leverage.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 2: THE DELTA PROTOCOL</h2></div>
+        <p class="text-block fly-in">You will use offshore derivatives exchanges. Delta Exchange is the battleground.</p>
+        <p class="text-block fly-in">Delta allows you to trade contracts, not physical coins. You are betting on the price action.</p>
+        <p class="text-block fly-in">This allows you to make money when the market bleeds. Shorting is where the true violence happens.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 3: THE AIOTUSD.P STRIKE</h2></div>
+        <p class="text-block fly-in">Let's look at an exact operational asset: the AIOTUSD.P perpetual contract.</p>
+        <p class="text-block fly-in">When AI narratives hype up, retail money floods in. The coin pumps artificially.</p>
+        <p class="text-block fly-in">You wait for the exhaustion candle. You enter a short position with precision leverage. As retail panics, your profit skyrockets.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 4: LEVERAGE VS LIQUIDATION</h2></div>
+        <p class="text-block fly-in">Leverage is a chainsaw. If you don't respect it, it will cut your fucking arm off.</p>
+        <p class="text-block fly-in">10x leverage means a 10% move doubles your money. But a 10% move against you liquidates your entire account.</p>
+        <p class="text-block fly-in">Amateurs use 50x leverage on a $50 account and gamble. Operators use 5x leverage on a $5,000 account and surgically extract $500 a day.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 5: CANDLESTICK ANATOMY</h2></div>
+        <p class="text-block fly-in">A candlestick is not a picture. It is a psychological footprint of buyers and sellers.</p>
+        <p class="text-block fly-in">The wick tells you where price was rejected. A massive wick at the top means sellers violently pushed the buyers back down.</p>
+        <p class="text-block fly-in">That is your signal. When you see rejection at resistance, you load the short.</p>
     </template>
 
     <template id="m3-p2">
-        <h1 class="old-money-heading text-5xl md:text-7xl mb-12 fly-in text-center md:text-left">THE SETUP PROTOCOL</h1>
-        <div class="tilt-card bg-[#2c1e12]/80 border border-[#AA771C]/40 p-8 md:p-12 mb-10 rounded-sm fly-in">
-            <h2 class="text-3xl font-black text-[#D4AF37] mb-8 tracking-widest uppercase hover-text-float">2. The Arsenal Assembly ⚔️</h2>
-            
-            <p class="text-lg md:text-xl leading-loose mb-10 text-gray-300">You must secure the highest paying enterprise contracts. Do not mess around with 5% Amazon affiliates. We want 40% to 50% recurring SaaS deals.</p>
-            
-            <ul class="space-y-6 text-gray-300">
-                <li class="p-6 bg-black/40 border border-gray-800 rounded shadow-inner">
-                    <span class="text-cyan-400 font-black text-xl block mb-2">STEP 1: THE NETWORK 🌐</span> 
-                    Go to <a href="https://partnerstack.com" target="_blank" class="stealth-link">PartnerStack</a>. Apply to B2B platforms like Monday.com, HubSpot, or <a href="https://gohighlevel.com" target="_blank" class="stealth-link">GoHighLevel</a>. Get approved as an agency partner.
-                </li>
-                
-                <li class="p-6 bg-black/40 border border-gray-800 rounded shadow-inner">
-                    <span class="text-cyan-400 font-black text-xl block mb-2">STEP 2: THE LEAD MACHINE 🎯</span> 
-                    You need data. You will use <a href="https://apollo.io" target="_blank" class="stealth-link">Apollo.io</a> to scrape 10,000 verified emails of founders, CEOs, and agency owners in your target niche.
-                </li>
-                
-                <li class="p-6 bg-black/40 border border-gray-800 rounded shadow-inner">
-                    <span class="text-cyan-400 font-black text-xl block mb-2">STEP 3: COLD INFRASTRUCTURE 🧊</span> 
-                    Do not send from your main Gmail. It will get banned. Buy 3 burner domains. Connect them to <a href="https://instantly.ai" target="_blank" class="stealth-link">Instantly.ai</a> and blast 500 targeted cold emails a day offering a "free operational audit."
-                </li>
-            </ul>
-        </div>
+        <h1 class="old-money-heading text-5xl md:text-7xl mb-4 fly-in">FUTURES WARFARE</h1>
+        <p class="text-xl text-[#00FFFF] font-mono tracking-widest mb-12 fly-in">PART 2: THE SETUP PROTOCOL</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 1: EXCHANGE CONFIGURATION</h2></div>
+        <p class="text-block fly-in">Set up your Delta Exchange account. Use a VPN if you are in a restricted zone.</p>
+        <p class="text-block fly-in">Fund the account with USDT via TRC-20 network to avoid massive Ethereum gas fees.</p>
+        <p class="text-block fly-in">Transfer the USDT from your Spot Wallet to your Futures Wallet. You are now armed.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 2: TRADINGVIEW ARSENAL</h2></div>
+        <p class="text-block fly-in">Do not analyze charts on the exchange. Go to TradingView.com.</p>
+        <p class="text-block fly-in">Keep the chart clean. Price action is king. Remove the 15 bullshit indicators amateurs use.</p>
+        <p class="text-block fly-in">Mark your Support (where buyers step in) and Resistance (where sellers step in) on the 4-Hour chart.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 3: THE ORDER TYPES</h2></div>
+        <p class="text-block fly-in">Never use Market Orders to enter. You pay higher fees and get bad entries.</p>
+        <p class="text-block fly-in">Use Limit Orders. You dictate the exact price you want to enter the market. Let the price come to you.</p>
+        <p class="text-block fly-in">If the price misses your limit order, let it go. There is another trade tomorrow.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 4: ISOLATED VS CROSS MARGIN</h2></div>
+        <p class="text-block fly-in">Always use Isolated Margin. This restricts the risk to the exact amount you put into the trade.</p>
+        <p class="text-block fly-in">If you use Cross Margin and the market flashes, it will drain your entire wallet to keep the bad trade alive.</p>
+        <p class="text-block fly-in">Isolate the risk. Protect the capital. Survive to trade another day.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 5: CALCULATING POSITION SIZE</h2></div>
+        <p class="text-block fly-in">If your account is $1,000, you never risk more than $20 (2%) on a single trade.</p>
+        <p class="text-block fly-in">You calculate where your stop loss goes. If it is 5% away, you adjust your leverage so that a 5% drop equals exactly $20.</p>
+        <p class="text-block fly-in">Mathematics guarantees survival. Emotions guarantee liquidation.</p>
     </template>
 
     <template id="m3-p3">
-        <h1 class="old-money-heading text-5xl md:text-7xl mb-12 fly-in text-center md:text-left">THE MANIPULATION</h1>
-        <div class="tilt-card bg-[#2c1e12]/80 border border-[#00FFFF]/40 p-8 md:p-12 mb-10 rounded-sm fly-in shadow-[0_0_30px_rgba(0,255,255,0.1)]">
-            <h2 class="text-3xl font-black text-[#00FFFF] mb-8 tracking-widest uppercase hover-text-float">3. The 60-Day Cookie Strike 🍪</h2>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300">Enterprise CEOs do not click and buy on the same day. You get them on a Zoom call, you screen-share the software, you prove it saves them $20,000 a year, and then you send them your link via email.</p>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300">The beautiful reality of SaaS affiliate marketing is the <span class="font-black text-white border-b-2 border-white">Tracking Cookie</span>. When they click your link, it tracks their IP address and browser for up to 90 days. Even if they discuss it with their board for a month and go directly to the website later, the code remembers you. You still get the $2,500.</p>
-            
-            <div class="bg-cyan-900/20 p-8 border-l-4 border-cyan-500 mt-10">
-                <h4 class="font-black text-white text-xl mb-4 tracking-widest uppercase">🎥 THE LOOM HACK</h4>
-                <p class="font-mono text-base leading-relaxed text-gray-300">Instead of begging for Zoom calls, record a 3-minute screen recording using Loom. Say: "Hey [CEO Name], I noticed your sales team has no automated follow-up. I built a workflow for you here that closes 20% more deals." Send the video. Underneath the video, put the affiliate link. Conversion rates will skyrocket.</p>
-            </div>
-        </div>
-    </template>
+        <h1 class="old-money-heading text-5xl md:text-7xl mb-4 fly-in">FUTURES WARFARE</h1>
+        <p class="text-xl text-[#00FFFF] font-mono tracking-widest mb-12 fly-in">PART 3: THE MANIPULATION</p>
 
-    <template id="m4-p1">
-        <h1 class="old-money-heading text-5xl md:text-7xl mb-12 fly-in text-center md:text-left">THE $47 WALL</h1>
-        <div class="tilt-card bg-[#2c1e12]/80 border border-[#AA771C]/40 p-8 md:p-12 mb-10 rounded-sm fly-in">
-            <h2 class="text-3xl font-black text-[#D4AF37] mb-8 tracking-widest uppercase hover-text-float">1. Low-Ticket Cashflow 🛡️</h2>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300">You cannot survive hunting big whales if you can't pay your fucking rent. You need a baseline. You need a shield.</p>
-            
-            <p class="text-lg md:text-xl leading-loose mb-8 text-gray-300">You package your knowledge into a high-value PDF document. You price it at $47 or $49. You put it on Gumroad. This weeds out the broke, useless freebie-seekers! Keep the buyers.</p>
-            
-            <div class="bg-black/60 p-8 border-l-4 border-yellow-500 mt-10 shadow-[0_0_20px_rgba(255,215,0,0.1)]">
-                <h4 class="text-yellow-400 font-black text-xl mb-4 tracking-widest uppercase">🏦 BANKING PROTOCOL (CRITICAL)</h4>
-                <p class="font-mono text-base leading-relaxed text-gray-300">When setting up your Gumroad payout, operational security is everything. If you use a family member's ID to bypass live verification, the banking details MUST match the ID exactly. If the official document has a specific spelling for the name, do not mistype it in the bank portal. Secure the payload, extract the capital, and stay off the radar.</p>
-            </div>
-        </div>
-    </template>
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 1: LIQUIDITY HUNTING</h2></div>
+        <p class="text-block fly-in">Market makers control the price. They push the price to where the most retail stop losses are sitting.</p>
+        <p class="text-block fly-in">When you see retail traders place their stops right below an obvious support line, expect a fakeout.</p>
+        <p class="text-block fly-in">The market drops, triggers their stops, and shoots back up. You wait for the fakeout, then enter long.</p>
 
-    <script>
-        // KINETIC CLICK EFFECT
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 2: FOMO DESTRUCTION</h2></div>
+        <p class="text-block fly-in">Fear Of Missing Out is how retail traders get slaughtered.</p>
+        <p class="text-block fly-in">You see a massive green candle. Your brain screams "Buy!" That is exactly when the smart money is selling to you.</p>
+        <p class="text-block fly-in">If you missed the initial move, you missed the trade. Sit on your hands.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 3: REVENGE TRADING</h2></div>
+        <p class="text-block fly-in">If your stop loss hits, you accept it. You close the laptop.</p>
+        <p class="text-block fly-in">Revenge trading is when you instantly re-enter the market angry, trying to make the loss back.</p>
+        <p class="text-block fly-in">That is how a controlled $50 loss turns into a $5,000 blown account in 10 minutes.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 4: PROFIT EXTRACTION</h2></div>
+        <p class="text-block fly-in">Paper profit means absolutely nothing until it is realized.</p>
+        <p class="text-block fly-in">Take partial profits at predetermined levels. Move your stop loss to breakeven so it becomes a risk-free trade.</p>
+        <p class="text-block fly-in">Route the extracted capital into stablecoins, and withdraw it. That is how empires are built.</p>
+
+        <div class="chapter-marker fly-in"><h2 class="text-3xl font-black text-[#D4AF37] uppercase tracking-widest">CHAPTER 5: THE EMOTIONLESS OPERATOR</h2></div>
+        <p class="text-block fly-in">If your heart rate goes up when you are in a trade, your position size is too big.</p>
+        <p class="text-block fly-in">You must execute like a machine. A machine does not hope. A machine executes the protocol.</p>
+        <p class="text-block fly-in">Master your mind, and you will extract endless liquidity from the global markets.</p>
+                                               </template>
+                 <script>
+        // CYAN THUNDERSTRIKE CLICK
         document.addEventListener('click', function(e) {
-            let ripple = document.createElement('div');
-            ripple.className = 'click-ripple';
-            ripple.style.left = e.clientX + 'px';
-            ripple.style.top = e.clientY + 'px';
-            document.body.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 700);
+            if(e.target.tagName.toLowerCase() === 'button') return; 
+            let thunder = document.createElement('div');
+            thunder.className = 'thunder-strike';
+            thunder.style.left = e.clientX + 'px';
+            thunder.style.top = e.clientY + 'px';
+            document.body.appendChild(thunder);
+            setTimeout(() => thunder.remove(), 400);
         });
 
-        // THE VAULT DATABASE (4 Active, 21 Locked)
-        const arcModels = [
+        // VAULT ARCHITECTURE
+        const vaultStructure = [
             {
-                title: "MODEL 01: ARC NATURAL (AFFILIATE)",
-                locked: false,
-                parts: [
-                    { id: "m1-p1", title: "PART 1: THE VISION 👁️" },
-                    { id: "m1-p2", title: "PART 2: THE SETUP ⚙️" },
-                    { id: "m1-p3", title: "PART 3: THE MANIPULATION 🎭" }
+                tier: "TIER 1: INSTANT LIQUIDITY",
+                models: [
+                    { id: "arc-aff", title: "ARC AFFILIATE", locked: false, parts: [ { id: "m1-p1", name: "PART 1: KNOWLEDGE" }, { id: "m1-p2", name: "PART 2: SETUP" }, { id: "m1-p3", name: "PART 3: MANIPULATION" } ] },
+                    { id: "ai-train", title: "AI TRAINING AGENCY", locked: false, parts: [ { id: "m2-p1", name: "PART 1: KNOWLEDGE" }, { id: "m2-p2", name: "PART 2: SETUP" }, { id: "m2-p3", name: "PART 3: MANIPULATION" } ] },
+                    { id: "crypto-fut", title: "CRYPTO FUTURES", locked: false, parts: [ { id: "m3-p1", name: "PART 1: KNOWLEDGE" }, { id: "m3-p2", name: "PART 2: SETUP" }, { id: "m3-p3", name: "PART 3: MANIPULATION" } ] },
+                    { id: "ghost-ag", title: "GHOST AGENCY", locked: true, parts: [] },
+                    { id: "onlyfans", title: "ONLYFANS MANAGEMENT", locked: true, parts: [] }
                 ]
             },
             {
-                title: "MODEL 02: AI TRAINING AGENCY",
-                locked: false,
-                parts: [
-                    { id: "m2-p1", title: "PART 1: THE BLEEDING NECK 🩸" },
-                    { id: "m2-p2", title: "PART 2: THE SETUP 💻" },
-                    { id: "m2-p3", title: "PART 3: THE MANIPULATION 🕷️" }
+                tier: "TIER 2: COMPOUNDING MACHINES",
+                models: [
+                    { id: "saas-toll", title: "SAAS TOLL BOOTH", locked: true, parts: [] },
+                    { id: "yt-arb", title: "YOUTUBE ARBITRAGE", locked: true, parts: [] },
+                    { id: "news-acq", title: "NEWSLETTER ACQUISITION", locked: true, parts: [] },
+                    { id: "info-incub", title: "INFO-PRODUCT INCUBATOR", locked: true, parts: [] },
+                    { id: "tiktok-shop", title: "TIKTOK SHOP PRINTING", locked: true, parts: [] }
                 ]
             },
             {
-                title: "MODEL 03: SAAS TOLL BOOTH",
-                locked: false,
-                parts: [
-                    { id: "m3-p1", title: "PART 1: HIGH-TICKET BROKERAGE 🛑" },
-                    { id: "m3-p2", title: "PART 2: THE SETUP ⚔️" },
-                    { id: "m3-p3", title: "PART 3: THE MANIPULATION 🍪" }
-                ]
-            },
-            {
-                title: "MODEL 04: THE DIGITAL SHIELD",
-                locked: false,
-                parts: [
-                    { id: "m4-p1", title: "PART 1: THE $47 WALL 🛡️" }
+                tier: "TIER 3: THE EMPIRE",
+                models: [
+                    { id: "soft-own", title: "SOFTWARE OWNERSHIP", locked: true, parts: [] },
+                    { id: "offshore", title: "OFFSHORE HOLDINGS", locked: true, parts: [] },
+                    { id: "private-eq", title: "PRIVATE EQUITY", locked: true, parts: [] },
+                    { id: "real-estate", title: "REAL ESTATE HOLDINGS", locked: true, parts: [] },
+                    { id: "delta-protocol", title: "THE DELTA PROTOCOL", locked: true, parts: [] }
                 ]
             }
         ];
-
-        // GENERATE LOCKED MODELS (To show massive scale)
-        const lockedNames = [
-            "GHOST COMMERCE", "YOUTUBE ARBITRAGE", "ONLYFANS MANAGEMENT", 
-            "NEWSLETTER ACQUISITION", "INFO-PRODUCT INCUBATOR", "TIKTOK SHOP PRINTING",
-            "X/TWITTER GHOSTWRITING", "DISCORD COMMUNITY MONETIZATION", "SOFTWARE WHITE-LABELING", 
-            "OFFSHORE STAFFING ARBITRAGE", "LOCAL SEO HIJACKING", "INSTAGRAM THEME PAGES", 
-            "UGC CONTENT AGENCY", "HIGH-TICKET APPOINTMENT SETTING", "PINTEREST E-COM", 
-            "LINKEDIN B2B GROWTH", "PODCAST CLIPPING AGENCY", "TELEGRAM SIGNAL GROUPS",
-            "THE DELTA PROTOCOL", "RAPID SCALING VELOCITY", "THE ESCAPE ROUTE"
-        ];
-        
-        lockedNames.forEach((name, index) => {
-            let num = index + 5;
-            arcModels.push({
-                title: "MODEL " + (num < 10 ? "0" + num : num) + ": " + name,
-                locked: true,
-                parts: []
-            });
-        });
 
         let activeId = "m1-p1";
-        let isAudioPlaying = false;
         
-        // Solid, stable audio link
-        const audioSrc = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"; 
-
-        const audioEl = document.getElementById('arc-audio');
+        // NEURAL TEXT TO SPEECH ENGINE
+        const synth = window.speechSynthesis;
         const audioBtn = document.getElementById('audio-btn');
-        const sidebar = document.getElementById('sidebar');
-        const navContainer = document.getElementById('nav-container');
-        const contentArea = document.getElementById('lesson-content');
-        const scrollCanvas = document.getElementById('scroll-canvas');
-        const menuBtn = document.getElementById('mobile-menu-btn');
-
-        // AUDIO SETUP
-        audioEl.src = audioSrc;
-        audioEl.volume = 0.5;
-
-        // EVENT LISTENERS
-        menuBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-        });
 
         audioBtn.addEventListener('click', () => {
-            if(isAudioPlaying) {
-                audioEl.pause();
-                audioBtn.innerHTML = '🔊 INITIALIZE AUDIO';
+            if (synth.speaking) {
+                synth.cancel();
+                audioBtn.innerHTML = '🔊 INITIALIZE DICTATION';
                 audioBtn.classList.remove('bg-[#D4AF37]', 'text-black');
             } else {
-                let playPromise = audioEl.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(_ => {
-                        audioBtn.innerHTML = '⏸ DICTATION ACTIVE';
-                        audioBtn.classList.add('bg-[#D4AF37]', 'text-black');
-                    }).catch(error => {
-                        console.log("Autoplay prevented by browser.", error);
-                    });
-                }
+                const contentArea = document.getElementById('lesson-content');
+                const paragraphs = contentArea.querySelectorAll('p, h1, h2, h3');
+                let textToRead = "";
+                paragraphs.forEach(p => textToRead += p.innerText + ". ");
+                
+                if(!textToRead) return;
+                
+                const utterance = new SpeechSynthesisUtterance(textToRead);
+                utterance.rate = 0.9; 
+                
+                utterance.onend = () => {
+                    audioBtn.innerHTML = '🔊 INITIALIZE DICTATION';
+                    audioBtn.classList.remove('bg-[#D4AF37]', 'text-black');
+                };
+
+                synth.speak(utterance);
+                audioBtn.innerHTML = '⏸ STOP DICTATION';
+                audioBtn.classList.add('bg-[#D4AF37]', 'text-black');
             }
-            isAudioPlaying = !isAudioPlaying;
         });
 
         function buildNav() {
-            navContainer.innerHTML = '';
+            const nav = document.getElementById('nav-container');
+            nav.innerHTML = '';
             
-            arcModels.forEach(mod => {
-                const section = document.createElement('div');
-                section.className = 'mb-8';
+            vaultStructure.forEach(tierBlock => {
+                const tierDiv = document.createElement('div');
+                tierDiv.className = 'mb-10';
+                tierDiv.innerHTML = `<h3 class="text-[10px] text-gray-500 font-black mb-4 tracking-[0.3em] border-b border-gray-800 pb-2">${tierBlock.tier}</h3>`;
                 
-                const header = document.createElement('div');
-                header.className = 'text-[11px] text-[#D4AF37] font-black mb-4 tracking-[0.1em] uppercase flex justify-between items-center';
-                header.innerText = mod.title;
+                tierBlock.models.forEach(mod => {
+                    const modDiv = document.createElement('div');
+                    modDiv.className = 'mb-4';
+                    
+                    let headerHtml = `<div class="text-xs text-[#D4AF37] font-bold mb-2 tracking-widest uppercase flex justify-between">${mod.title}`;
+                    if(mod.locked) headerHtml += ' <span class="text-red-500 text-sm">🔒</span>';
+                    headerHtml += `</div>`;
+                    
+                    let ulHtml = `<ul class="space-y-1 pl-2 border-l border-[#AA771C]/30">`;
+                    
+                    if(!mod.locked) {
+                        mod.parts.forEach(p => {
+                            const activeClass = p.id === activeId ? 'active' : '';
+                            ulHtml += `<li><div onclick="loadContent('${p.id}')" class="nav-item px-4 py-2 text-[11px] font-black tracking-widest text-gray-300 ${activeClass}">${p.name}</div></li>`;
+                        });
+                    } else {
+                        ulHtml += `<li><div class="locked-item px-4 py-2 text-[10px] font-black text-red-500 tracking-widest">NOT ELIGIBLE TO UNLOCK</div></li>`;
+                    }
+                    
+                    ulHtml += `</ul>`;
+                    modDiv.innerHTML = headerHtml + ulHtml;
+                    tierDiv.appendChild(modDiv);
+                });
                 
-                if(mod.locked) {
-                    const lock = document.createElement('span');
-                    lock.className = 'text-red-500 text-sm';
-                    lock.innerText = '🔒';
-                    header.appendChild(lock);
-                }
-                section.appendChild(header);
-
-                const ul = document.createElement('ul');
-                ul.className = 'space-y-3 pl-3 border-l border-[#AA771C]/30';
-                
-                if(!mod.locked) {
-                    mod.parts.forEach(p => {
-                        const li = document.createElement('li');
-                        const itemDiv = document.createElement('div');
-                        itemDiv.className = 'nav-item px-4 py-2 text-xs font-black tracking-wider text-gray-300 ' + (p.id === activeId ? 'active' : '');
-                        itemDiv.innerText = p.title;
-                        
-                        itemDiv.addEventListener('click', () => { loadContent(p.id); });
-                        
-                        li.appendChild(itemDiv);
-                        ul.appendChild(li);
-                    });
-                } else {
-                    const li = document.createElement('li');
-                    li.innerHTML = '<div class="locked-item px-4 py-2 text-[10px] font-black text-red-500 tracking-[0.2em] uppercase">NOT ELIGIBLE TO UNLOCK</div>';
-                    ul.appendChild(li);
-                }
-                
-                section.appendChild(ul);
-                navContainer.appendChild(section);
+                nav.appendChild(tierDiv);
             });
         }
 
@@ -494,27 +451,53 @@
             activeId = id;
             buildNav(); 
             
+            if(synth.speaking) {
+                synth.cancel();
+                audioBtn.innerHTML = '🔊 INITIALIZE DICTATION';
+                audioBtn.classList.remove('bg-[#D4AF37]', 'text-black');
+            }
+
             const template = document.getElementById(id);
+            const contentArea = document.getElementById('lesson-content');
+            
             if(template) {
                 contentArea.innerHTML = template.innerHTML;
             } else {
-                contentArea.innerHTML = '<h1 class="text-red-500 font-black text-4xl">SYSTEM ERROR 404</h1><p class="text-gray-400 mt-4">Module data corrupted or missing.</p>';
+                contentArea.innerHTML = '<h1 class="text-red-500 font-black text-4xl">SYSTEM ERROR</h1><p class="text-gray-400">Data array empty.</p>';
             }
             
-            scrollCanvas.scrollTop = 0;
+            document.getElementById('scroll-canvas').scrollTop = 0;
             
-            // Close mobile sidebar
             if(window.innerWidth < 768) {
-                sidebar.classList.add('-translate-x-full');
+                document.getElementById('sidebar').classList.add('-translate-x-full');
             }
 
-            // Trigger 3D Fly-In Animations
-            setTimeout(() => {
-                document.querySelectorAll('.fly-in').forEach(el => el.classList.add('active'));
-            }, 50);
+            setupScrollMagic();
         }
 
-        // INITIALIZE
+        function setupScrollMagic() {
+            const elements = document.querySelectorAll('.fly-in');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+
+            elements.forEach(el => observer.observe(el));
+            
+            setTimeout(() => {
+                elements.forEach((el, index) => {
+                    if(index < 4) el.classList.add('active');
+                });
+            }, 100);
+        }
+
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        });
+
         window.addEventListener('DOMContentLoaded', () => {
             buildNav();
             loadContent('m1-p1');
