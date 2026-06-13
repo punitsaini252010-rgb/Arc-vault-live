@@ -51,16 +51,6 @@
             <div class="max-w-4xl mx-auto pb-40" id="lesson-content"></div>
         </div>
     </div>
-
-    ```
-
-**Step 2: Check the Middle (Your Templates)**
-Right below that top section, you should see all the `<template>` blocks you pasted (The Awaker, ARC Affiliate Part 1, Part 2, etc.). Do not touch them. They are perfectly fine.
-
-**Step 3: Check the Bottom of Your File**
-Scroll to the very bottom of your code. If the JavaScript is missing, the menu won't build, and the screen will blank. Ensure your file ends exactly like this (if it doesn't, paste this at the bottom):
-
-```html
     <script>
         document.addEventListener('click', function(e) {
             if(e.target.tagName.toLowerCase() === 'button' || e.target.closest('.nav-item')) return; 
